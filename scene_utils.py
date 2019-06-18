@@ -75,6 +75,12 @@ class planet:
         if self.P == None:
             self.P = np.sqrt( 4*np.pi**2 / (c.G * (self.mstar + self.mplan) ) * \
                               (self.a)**3 ).to(u.year)
+
+        if self.argperi == None:
+            self.argperi = 0 * u.deg
+
+        if self.tperi == None:
+            self.tperi = 0 * u.year
             
     def compute_ephem(self, tmax, tstep):
         ts = np.arange(0, tmax.value + tstep.to(tmax.unit).value, tstep.to(tmax.unit).value) * tmax.unit
@@ -95,7 +101,8 @@ class planet:
                                         argperi=self.argperi.to(u.radian).value, 
                                         meananom=0,
                                         mstar=self.mstar, mplan=self.mplan,
-                                        epoch=epoch.to(u.year).value,
+                                        tperi=self.tperi.to(u.year),
+                                        epoch=epoch.to(u.year),
                                         inc_obs=0))
             pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
             cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r * np.sqrt(np.sum(plnt_obs_vec**2))))
@@ -156,10 +163,14 @@ def cartesian(a,
               meananom,
               mstar,
               mplan,
+              tperi = 0.0,
               epoch = 0.0,
               inc_obs=None,
              ):
     pio180 = pi/180.
+    # Modified June 2019 to enable the application of absolute times for 
+    # time of periastron and epoch.
+    #
     # Modified Sep 2018 to allow for variable star mass.
     
     #GM = 4. * pi * pi
@@ -167,7 +178,7 @@ def cartesian(a,
     period = np.sqrt( 4*pi**2 / (c.G * (mstar + mplan) ) * (a*u.AU)**3 ).to(u.year)
     # Compute orbital periods and astrometric signatures
     # pPeriod = np.sqrt( 4*np.pi**2 / (astropy.constants.G * (sMass + pMass) ) * pSMA**3 ).to(u.year)
-    mean_anomaly = meananom + 2.*pi*epoch/period.value
+    mean_anomaly = meananom + 2.*pi * (epoch - tperi).value / period.value
     
     # first, compute ecc. anom
     if not isinstance(mean_anomaly,float):
@@ -189,7 +200,7 @@ def cartesian(a,
     yd = foo * (a * meanmotion * cosE * denom)
     zd = np.zeros_like(yd)
 
-    # rotate by argument of perihelion in orbit plane
+    # rotate by argument of periastron in orbit plane
     cosw = cos(argperi)
     sinw = sin(argperi)
     xp = x * cosw - y * sinw
@@ -276,7 +287,8 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
     c_img = imgsize//2
     
     # vector to the star
-    plnt_obs_vec = np.array([0.,0., -planetlist[0].dist.to(u.AU).value]).T
+    #plnt_obs_vec = np.array([0.,0., -planetlist[0].dist.to(u.AU).value]).T
+    plnt_obs_vec = np.array([0.,0., planetlist[0].dist.to(u.AU).value]).T
 
     phasefunclist = []
     contrastlist = []
@@ -292,7 +304,8 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
                                     argperi=planet.argperi.to(u.radian).value, 
                                     meananom=0,
                                     mstar=planet.mstar, mplan=planet.mplan,
-                                    epoch=epoch.to(u.year).value,
+                                    tperi=planet.tperi.to(u.year),
+                                    epoch=epoch.to(u.year),
                                     inc_obs=inc_obs.to(u.radian).value))
         pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
         cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r * np.sqrt(np.sum(plnt_obs_vec**2))))
@@ -313,7 +326,6 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
             contrast = lambert_pf*planet.albedo_vals[0]*(planet.radius.to(u.AU)/pl_r)**2
             img[coords] += contrast
             contrastlist.append(contrast)
-#             print img[coords]
     return {'img':img,
             'phasefunclist':phasefunclist,
             'contrastlist':contrastlist,
