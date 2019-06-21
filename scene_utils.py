@@ -91,7 +91,7 @@ class planet:
         phasefunc = np.zeros(Nt)
         orad = np.zeros(Nt) * u.AU
         
-        plnt_obs_vec = np.array([0.,0., -self.dist.to(u.AU).value]).T
+        plnt_obs_vec = np.array([0.,0., self.dist.to(u.AU).value]).T
         
         for tt, epoch in enumerate(ts):      
             posvel = np.array(cartesian(a=self.a.to(u.AU).value,
@@ -287,7 +287,6 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
     c_img = imgsize//2
     
     # vector to the star
-    #plnt_obs_vec = np.array([0.,0., -planetlist[0].dist.to(u.AU).value]).T
     plnt_obs_vec = np.array([0.,0., planetlist[0].dist.to(u.AU).value]).T
 
     phasefunclist = []
