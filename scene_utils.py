@@ -5,6 +5,7 @@ import scipy.ndimage
 import scipy.interpolate
 import skimage.transform
 import os
+import pkg_resources
 import pandas
 import csv
 
@@ -471,6 +472,7 @@ def get_bulk_astrom_offset(t_ref, t_obs, mu_RA, mu_Dec, plx, coord_icrs):
     # Deriving the new Ecliptic coordinates
     elat_wplx = np.arcsin( z_nrm )
     elon_wplx = np.arctan2( y_nrm, x_nrm )
+    #print("elon, elat = {:.4f}, {:.4f}".format(np.rad2deg(elon_wplx), np.rad2deg(elat_wplx)))
     
     coord_ec_wplx = astropy.coordinates.BarycentricTrueEcliptic(
             lon = elon_wplx, lat = elat_wplx)
@@ -734,3 +736,116 @@ def get_detector_exposure(countrate_map, total_inttime, read_inttime,
         return exposure_array, N_reads, read_cube
     else:
         return exposure_array, N_reads
+
+def bpgs_list(spectype=None,verbose=False):
+    '''
+    Returns pandas dataframe with the list of the files, the name and the type of the star
+
+    '''
+    #fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_readme.csv'
+    fname = pkg_resources.resource_filename('scene_utils', 'bpgs/bpgs_readme.csv')
+    dat = pandas.read_csv(fname)
+    if spectype is not None: dat = dat[dat['Type']==spectype]
+    if verbose: print(dat)
+    return dat
+
+def bpgs_spectype_to_photonrate(spectype,Vmag,minlam,maxlam):
+    '''
+    Parameters
+    ----------
+    spectype: string
+        String representing the spectral type of the star
+    Vmag: float
+        V magnitude of star
+    minlam: float
+        Minimum wavelength of the band in nm    
+    maxlam: float
+        Maximum wavelength of the band in nm    
+    
+    Returns
+    -------
+    val: Quantity
+        Photons/second/m2 coming from the star within the band
+    '''
+    dat = bpgs_list(verbose=False)
+    subset = dat[dat['Type']==spectype]
+    if len(subset) > 0:
+        specnum = dat[dat['Type']==spectype].index[0]+1
+        fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_' + str(specnum)+ '.fits'
+    
+        return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
+    else:
+        print('No corresponding spectral type in database, check crispy/Input/bpgs/bpgs_readme.csv')
+
+
+def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
+    '''
+    Parameters
+    ----------
+    specnum: int
+        Number of spectrum file from bpgs folder (in crispy/Input/bpgs folder)
+    Vmag: float
+        V magnitude of star
+    minlam: float
+        Minimum wavelength of the band in nm    
+    maxlam: float
+        Maximum wavelength of the band in nm    
+    
+    Returns
+    -------
+    val: Quantity
+        Photons/second/m2 coming from the star within the band
+    '''
+    fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_' + str(specnum)+ '.fits'
+    return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
+
+def bpgsfile_to_photonrate(filename,Vmag,minlam,maxlam):
+    '''
+    Parameters
+    ----------
+    filename: string
+        Text file corresponding to the bpgs specturm in pysynphot catalog
+    Vmag: float
+        V magnitude of star
+    minlam: float
+        Minimum wavelength of the band in nm    
+    maxlam: float
+        Maximum wavelength of the band in nm    
+    
+    Returns
+    -------
+    val: Quantity
+        Photons/second/m2 coming from the star within the band
+    '''
+    wavel = np.arange(minlam,maxlam)
+    star = input_star(filename,Vmag,wavel)
+    return (np.sum(star)*u.nm).to(u.photon/u.m**2/u.s)
+    
+
+def input_star(filename,Vmag,wavel):
+    '''
+    Parameters
+    ----------
+    filename: string
+        Text file corresponding to the bpgs specturm in pysynphot catalog
+    Vmag: float
+        V magnitude of star
+    wavel: array
+        Array of desired wavelengths in nanometers
+        
+    Returns
+    -------
+    val: Quantity
+        Photons/second/m2/nm coming from the star for each input wavelength bin
+    '''
+    fopen = fits.open(filename)
+    f = np.array(fopen[1].data)
+    # files are in erg s-1 cm-2 Ang-1
+    flam = u.erg/u.s/u.cm**2/u.Angstrom
+    fac = flam.to(u.W/u.m**2/u.nm)
+    dat = f['FLUX']*fac*10**(-0.4 * Vmag)
+    wav = f['WAVELENGTH']/10.
+    func = scipy.interpolate.interp1d(wav,dat,bounds_error=False,fill_value=0.0)
+    flux = func(wavel)*u.W/u.m**2/u.nm
+    Eph = (c.c*c.h/(wavel*u.nm)/u.photon).to(u.J/u.photon)
+    return (flux/Eph).to(u.photon/u.s/u.m**2/u.nm)
