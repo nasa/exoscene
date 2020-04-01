@@ -83,12 +83,16 @@ class planet:
         if self.tperi == None:
             self.tperi = 0 * u.year
             
-    def compute_ephem(self, tmax, tstep):
-        ts = np.arange(0, tmax.value + tstep.to(tmax.unit).value, tstep.to(tmax.unit).value) * tmax.unit
+    def compute_ephem(self, tarray=None, tmax=None, tstep=None):
+        if tarray == None:
+            ts = np.arange(0, tmax.value + tstep.to(tmax.unit).value, tstep.to(tmax.unit).value) * tmax.unit
+        else:
+            ts = tarray
         
         Nt = len(ts)
         delx = np.zeros(Nt) * u.milliarcsecond
         dely = np.zeros(Nt) * u.milliarcsecond
+        beta = np.zeros(Nt)
         phasefunc = np.zeros(Nt)
         orad = np.zeros(Nt) * u.AU
         
@@ -108,15 +112,15 @@ class planet:
             pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
             cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r * np.sqrt(np.sum(plnt_obs_vec**2))))
             # Beta is the planet phase, which is 180 degrees out of phase from the scattering angle.
-            beta = pi - np.arccos(cos_obs)
+            beta[tt] = pi - np.arccos(cos_obs)
             # Lambert phase function
-            lambert_pf = (sin(beta) + (pi - beta) * cos(beta)) / pi
+            lambert_pf = (sin(beta[tt]) + (pi - beta[tt]) * cos(beta[tt])) / pi
             phasefunc[tt] = lambert_pf
             orad[tt] = pl_r
             delx[tt] = np.arctan2(posvel[0]*u.AU, self.dist).to(u.milliarcsecond)
             dely[tt] = np.arctan2(posvel[1]*u.AU, self.dist).to(u.milliarcsecond)
         
-        return ts, delx, dely, phasefunc, orad
+        return ts, delx, dely, beta, phasefunc, orad
             
     def set_phase_curve(self, name, phasecurve_df, lambdac, inc, fsed, Rp=None, inc_orbit=None):
         # TODO: incorporate multiple wavelengths
@@ -246,8 +250,8 @@ def cartesian(a,
     
     return x,y,z,vx,vy,vz
 
-def write_ephem_table(planet, tstep, tspan, table_fname):
-    tseries, delx, dely, phasefunc, orad = planet.compute_ephem(tspan, tstep)
+def write_ephem_table(planet, table_fname, tarray=None, tstep=None, tspan=None):
+    tseries, delx, dely, beta, phasefunc, orad = planet.compute_ephem(tarray, tspan, tstep)
    
     ephem_table = astropy.table.QTable(data = [tseries, delx, dely, phasefunc, orad],
                                                names = ['t (years)', 'delta x (mas)', 'delta y (mas)',
