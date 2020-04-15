@@ -110,7 +110,7 @@ class planet:
                                         epoch=epoch.to(u.year),
                                         inc_obs=0))
             pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
-            cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r * np.sqrt(np.sum(plnt_obs_vec**2))))
+            cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r.value * np.sqrt(np.sum(plnt_obs_vec**2))))
             # Beta is the planet phase, which is 180 degrees out of phase from the scattering angle.
             beta[tt] = pi - np.arccos(cos_obs)
             # Lambert phase function
