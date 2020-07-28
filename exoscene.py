@@ -1,4 +1,4 @@
-from numpy import sin,cos,sqrt,pi
+from numpy import sin, cos, sqrt, pi
 import numpy as np
 import numpy.testing
 import scipy.ndimage
@@ -55,7 +55,7 @@ class planet:
             self.albedo_wavelens = albedo_wavelens
             self.albedo_vals = albedo_vals
         else:
-            self.albedo_wavelens = [575*u.nanometer]
+            self.albedo_wavelens = [575 * u.nanometer]
             self.albedo_vals = [0.3]
             
         if radius != None:
@@ -173,6 +173,8 @@ def cartesian(a,
               inc_obs=None,
              ):
     pio180 = pi/180.
+    # Modified July 2020 to correct coordinate convention for angles of orbital elements.
+    #
     # Modified June 2019 to enable the application of absolute times for 
     # time of periastron and epoch.
     #
@@ -194,9 +196,8 @@ def cartesian(a,
     sinE = sin(E)
 
     # compute unrotated positions and velocities
-    foo = sqrt(1.0 - ecc*ecc)
-#    meanmotion = sqrt(GM/(a*a*a))
-    meanmotion = 2*pi/period.value
+    foo = sqrt(1.0 - ecc * ecc)
+    meanmotion = 2 * pi / period.value
     x = a * (cosE - ecc)
     y = foo * (a * sinE)
     z = np.zeros_like(y)
@@ -206,8 +207,8 @@ def cartesian(a,
     zd = np.zeros_like(yd)
 
     # rotate by argument of periastron in orbit plane
-    cosw = cos(argperi)
-    sinw = sin(argperi)
+    cosw = cos(argperi - pi)
+    sinw = sin(argperi - pi)
     xp = x * cosw - y * sinw
     yp = x * sinw + y * cosw
     zp = z
@@ -226,8 +227,8 @@ def cartesian(a,
     zd = ydp * sini + zdp * cosi
 
     #rotate by longitude of node about z axis
-    cosnode = cos(longnode)
-    sinnode = sin(longnode)
+    cosnode = cos(longnode - pi / 2)
+    sinnode = sin(longnode - pi / 2)
     xf = x * cosnode - y * sinnode
     yf = x * sinnode + y * cosnode
     zf = z
@@ -746,8 +747,7 @@ def bpgs_list(spectype=None,verbose=False):
     Returns pandas dataframe with the list of the files, the name and the type of the star
 
     '''
-    #fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_readme.csv'
-    fname = pkg_resources.resource_filename('scene_utils', 'bpgs/bpgs_readme.csv')
+    fname = pkg_resources.resource_filename('exoscene', 'bpgs/bpgs_readme.csv')
     dat = pandas.read_csv(fname)
     if spectype is not None: dat = dat[dat['Type']==spectype]
     if verbose: print(dat)
@@ -775,12 +775,11 @@ def bpgs_spectype_to_photonrate(spectype,Vmag,minlam,maxlam):
     subset = dat[dat['Type']==spectype]
     if len(subset) > 0:
         specnum = dat[dat['Type']==spectype].index[0]+1
-        #fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_' + str(specnum)+ '.fits'
-        fname = pkg_resources.resource_filename('scene_utils', '/bpgs/bpgs_' + str(specnum)+ '.fits')
+        fname = pkg_resources.resource_filename('exoscene', '/bpgs/bpgs_' + str(specnum)+ '.fits')
     
         return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
     else:
-        print('No corresponding spectral type in database, check crispy/Input/bpgs/bpgs_readme.csv')
+        print('No corresponding spectral type in database, check exoscene/bpgs/bpgs_readme.csv')
 
 
 def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
@@ -801,8 +800,7 @@ def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
     val: Quantity
         Photons/second/m2 coming from the star within the band
     '''
-    #fname = pkg_resources.resource_filename('crispy', 'Inputs') + '/bpgs/bpgs_' + str(specnum)+ '.fits'
-    fname = pkg_resources.resource_filename('scene_utils', '/bpgs/bpgs_' + str(specnum)+ '.fits')
+    fname = pkg_resources.resource_filename('exoscene', '/bpgs/bpgs_' + str(specnum)+ '.fits')
     return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
 
 def bpgsfile_to_photonrate(filename,Vmag,minlam,maxlam):
