@@ -1,3 +1,4 @@
-# scene_utils
+# exoscene
 
-library of classes and subroutines for exoplanet scene simulation
+Library of classes and utility functions for simulating direct images of 
+exoplanetary systems.
