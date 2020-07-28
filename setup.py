@@ -11,7 +11,7 @@ setup(
       "astropy >= 4.0",
       "numpy",
       "scipy",
-      "skimage",
+      "scikit-image",
       "pandas"
   ],
 )
