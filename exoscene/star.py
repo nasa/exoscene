@@ -12,7 +12,7 @@ def bpgs_list(spectype=None,verbose=False):
     Returns pandas dataframe with the list of the files, the name and the type of the star
 
     '''
-    fname = pkg_resources.resource_filename('exoscene', 'bpgs/bpgs_readme.csv')
+    fname = pkg_resources.resource_filename('exoscene', 'data/bpgs/bpgs_readme.csv')
     dat = pandas.read_csv(fname)
     if spectype is not None: dat = dat[dat['Type']==spectype]
     if verbose: print(dat)
@@ -40,11 +40,11 @@ def bpgs_spectype_to_photonrate(spectype,Vmag,minlam,maxlam):
     subset = dat[dat['Type']==spectype]
     if len(subset) > 0:
         specnum = dat[dat['Type']==spectype].index[0]+1
-        fname = pkg_resources.resource_filename('exoscene', '/bpgs/bpgs_' + str(specnum)+ '.fits')
+        fname = pkg_resources.resource_filename('exoscene', 'data/bpgs/bpgs_' + str(specnum)+ '.fits')
     
         return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
     else:
-        print('No corresponding spectral type in database, check exoscene/bpgs/bpgs_readme.csv')
+        print('No corresponding spectral type in database, check exoscene/data/bpgs/bpgs_readme.csv')
 
 
 def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
@@ -52,7 +52,7 @@ def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
     Parameters
     ----------
     specnum: int
-        Number of spectrum file from bpgs folder (in crispy/Input/bpgs folder)
+        Number of spectrum file from bpgs folder (exoscene/data/bpgs/)
     Vmag: float
         V magnitude of star
     minlam: float
@@ -65,7 +65,7 @@ def bpgs_to_photonrate(specnum,Vmag,minlam,maxlam):
     val: Quantity
         Photons/second/m2 coming from the star within the band
     '''
-    fname = pkg_resources.resource_filename('exoscene', '/bpgs/bpgs_' + str(specnum)+ '.fits')
+    fname = pkg_resources.resource_filename('exoscene', 'data/bpgs/bpgs_' + str(specnum)+ '.fits')
     return bpgsfile_to_photonrate(fname,Vmag,minlam,maxlam)
 
 def bpgsfile_to_photonrate(filename,Vmag,minlam,maxlam):
@@ -90,7 +90,6 @@ def bpgsfile_to_photonrate(filename,Vmag,minlam,maxlam):
     star = input_star(filename,Vmag,wavel)
     return (np.sum(star)*u.nm).to(u.photon/u.m**2/u.s)
     
-
 def input_star(filename,Vmag,wavel):
     '''
     Parameters
