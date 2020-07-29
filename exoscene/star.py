@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.interpolate
 import pkg_resources
 import pandas
 

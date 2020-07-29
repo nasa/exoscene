@@ -6,7 +6,7 @@ import astropy.constants as c
 import astropy.table
 import pandas
 
-class planet:
+class Planet:
     def __init__(self, name, ipac_df=None, dist=None, P=None,
                  a=None, inc=None, ecc=None,
                  longnode=None, tperi=None, argperi=None,
