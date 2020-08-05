@@ -9,7 +9,8 @@ setup(
 
   packages=['exoscene'],
   package_data={'exoscene': ['./data/bpgs/bpgs_*.fits',
-                             './data/bpgs/bpgs_readme.csv']},
+                             './data/bpgs/bpgs_readme.csv',
+                             './data/cgi_hlc_psf/*.fits']},
 
   install_requires=[
       "astropy >= 4.0",
