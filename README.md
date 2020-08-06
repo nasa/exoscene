@@ -9,11 +9,11 @@ A jupyter notebook providing usage examples for much of the functionality is inc
 The functions are organized in 3 modules: [exoscene/planet.py](exoscene/planet.py), 
 [exoscene/star.py](exoscene/star.py), and [exoscene/image.py](exoscene/image.py).
 
-## 1. planet.py
+## 1. [exoscene/planet.py](exoscene/planet.py)
 
-* a Planet() class with a simple data structure for containing the basic physical 
-parameters of a planet, its orbit, its host star, and methods for computing its 
-relative astrometry ephemeris, its phase function, and flux ratio.
+* a Planet() class with a data structure for containing the basic physical 
+parameters of a planet, its orbit, its host star, and associated methods for
+computing its relative astrometry ephemeris, its phase function, and flux ratio.
 
 * A function for modeling the orbital position and Lambert sphere phase based
 on the Keplerian orbital elements and the date defined in the Planet class 
@@ -21,5 +21,26 @@ attributes.
 
 * A function for mapping the time-dependent sky-projected position and 
 Lambert phase factor.
+
+## 2. [exoscene/star.py](exoscene/star.py)
+
+* Functions for computing the band-integrated irradiance of a star based on its 
+apparent magnitude and spectral type, and instrument bandpass, using the built-in 
+Bruzual-Persson-Gunn-Stryker (BPGS) Spectral Atlas (under 
+[exoscene/data/bpgs/](exoscene/data/bpgs/))
+
+* A function for computing the approximate parallax and proper motion offset for 
+a star, based on the celestial coordinates and observing dates.
+
+## 3. [exoscene/image.py](exoscene/image.py)
+
+* A function for accurately resampling an image model array to a detector array.
+
+* Functions for translating a coronagraph PSF model to an arbitrary field point,
+taking into account position-dependent properties included in the model.
+
+* Functions for applying a noise model to a detector intensity map, to simulate
+an image with photon counting noise, read noise, and dark current, for a given 
+integration time.
 
 
