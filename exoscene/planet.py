@@ -86,22 +86,28 @@ class Planet:
         phasefunc = np.zeros(Nt)
         orad = np.zeros(Nt) * u.AU
         
-        plnt_obs_vec = np.array([0.,0., self.dist.to(u.AU).value]).T
+        dist = self.dist.to(u.AU)
         
         for tt, epoch in enumerate(ts):      
-            posvel = np.array(cartesian(a=self.a.to(u.AU).value,
-                                        ecc=self.ecc, 
-                                        incl=self.inc.to(u.radian).value, 
-                                        longnode=self.longnode.to(u.radian).value, 
-                                        argperi=self.argperi.to(u.radian).value, 
-                                        meananom=0,
-                                        mstar=self.mstar, mplan=self.mplan,
-                                        tperi=self.tperi.to(u.year),
-                                        epoch=epoch.to(u.year),
-                                        inc_obs=0))
-            pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
-            cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r.value * np.sqrt(np.sum(plnt_obs_vec**2))))
-            # Beta is the planet phase, which is 180 degrees out of phase from the scattering angle.
+            posvel = np.array(cartesian(a = self.a.to(u.AU).value,
+                                        ecc = self.ecc, 
+                                        incl = self.inc.to(u.radian).value, 
+                                        longnode = self.longnode.to(u.radian).value, 
+                                        argperi = self.argperi.to(u.radian).value, 
+                                        meananom = 0,
+                                        mstar = self.mstar, 
+                                        mplan = self.mplan,
+                                        tperi = self.tperi.to(u.year),
+                                        epoch = epoch.to(u.year),
+                                        inc_obs = 0))
+            pl_r = np.sqrt(posvel[0]**2 + posvel[1]**2 + posvel[2]**2) * u.AU
+            # The angle between the planet-observer and star-planet vectors
+            # is obtained from the vector law of cosines:
+            plnt_obs_vec = np.array([-posvel[0], -posvel[1], dist.value - posvel[2]])
+            plnt_obs_dist = np.sqrt(np.sum(plnt_obs_vec**2)) * u.AU
+            cos_obs = np.dot(plnt_obs_vec, posvel[:3]) / (pl_r.value * plnt_obs_dist.value)
+            # Beta is the planet phase angle, which is the supplement of the angle between the 
+            # star-planet and planet-observer vectors.
             beta[tt] = pi - np.arccos(cos_obs)
             # Lambert phase function
             lambert_pf = (sin(beta[tt]) + (pi - beta[tt]) * cos(beta[tt])) / pi
@@ -278,11 +284,11 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
     out: dict
         Dictionary with the system's image, the phase function
     '''
-    img = np.zeros((imgsize,imgsize))
-    c_img = imgsize//2
+    img = np.zeros((imgsize, imgsize))
+    c_img = imgsize // 2
     
     # vector to the star
-    plnt_obs_vec = np.array([0.,0., planetlist[0].dist.to(u.AU).value]).T
+    dist = planetlist[0].dist.to(u.AU)
 
     phasefunclist = []
     contrastlist = []
@@ -291,19 +297,24 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
     delylist = []
     
     for planet in planetlist:
-        posvel = np.array(cartesian(a=planet.a.to(u.AU).value,
-                                    ecc=planet.ecc, 
-                                    incl=planet.inc.to(u.radian).value, 
-                                    longnode=planet.longnode.to(u.radian).value, 
-                                    argperi=planet.argperi.to(u.radian).value, 
-                                    meananom=0,
-                                    mstar=planet.mstar, mplan=planet.mplan,
-                                    tperi=planet.tperi.to(u.year),
-                                    epoch=epoch.to(u.year),
-                                    inc_obs=inc_obs.to(u.radian).value))
-        pl_r = np.sqrt(posvel[0]**2+posvel[1]**2+posvel[2]**2) * u.AU
-        cos_obs = np.dot(plnt_obs_vec, posvel[:3] / (pl_r.value * np.sqrt(np.sum(plnt_obs_vec**2))))
-        # Beta is the planet phase, which is 180 degrees out of phase from the scattering angle.
+        posvel = np.array(cartesian(a = planet.a.to(u.AU).value,
+                                    ecc = planet.ecc, 
+                                    incl = planet.inc.to(u.radian).value, 
+                                    longnode = planet.longnode.to(u.radian).value, 
+                                    argperi = planet.argperi.to(u.radian).value, 
+                                    meananom = 0,
+                                    mstar = planet.mstar, mplan=planet.mplan,
+                                    tperi = planet.tperi.to(u.year),
+                                    epoch = epoch.to(u.year),
+                                    inc_obs = inc_obs.to(u.radian).value))
+        pl_r = np.sqrt(posvel[0]**2 + posvel[1]**2 + posvel[2]**2) * u.AU
+        # The angle between the planet-observer and star-planet vectors
+        # is obtained from the vector law of cosines:
+        plnt_obs_vec = np.array([-posvel[0], -posvel[1], dist.value - posvel[2]])
+        plnt_obs_dist = np.sqrt(np.sum(plnt_obs_vec**2)) * u.AU
+        cos_obs = np.dot(plnt_obs_vec, posvel[:3]) / (pl_r.value * plnt_obs_dist.value)
+        # Beta is the planet phase angle, which is the supplement of the angle between the 
+        # star-planet and planet-observer vectors.
         beta = pi - np.arccos(cos_obs)
         # Lambert phase function
         lambert_pf = (sin(beta) + (pi - beta) * cos(beta)) / pi
@@ -312,12 +323,14 @@ def planet_cube(imgsize, res, planetlist, epoch=0.0*u.year, inc_obs=0.0*u.deg):
         delylist.append( np.arctan2(posvel[1]*u.AU, planet.dist).to(u.milliarcsecond) )
     
         plpix = np.zeros(2)
-        plpix[0] = np.round(posvel[0]*u.AU/res)+c_img
-        plpix[1] = np.round(posvel[1]*u.AU/res)+c_img
-        coords = (int(plpix[0]),int(plpix[1]))
+        plpix[0] = np.round(posvel[1]*u.AU / res) + c_img
+        plpix[1] = np.round(posvel[0]*u.AU / res) + c_img
+        coords = (int(plpix[0]), int(plpix[1]))
         coordlist.append(coords)
-        if coords[0]<img.shape[0] and coords[0]>=0 and coords[1]<img.shape[1] and coords[1]>=0:
-            contrast = lambert_pf*planet.albedo_vals[0]*(planet.radius.to(u.AU)/pl_r)**2
+        if (coords[0] < img.shape[0] and coords[0] >= 0 and 
+            coords[1] < img.shape[1] and coords[1] >= 0):
+            contrast = (lambert_pf * planet.albedo_vals[0] * 
+                        (planet.radius.to(u.AU) / pl_r)**2)
             img[coords] += contrast
             contrastlist.append(contrast)
     return {'img':img,
