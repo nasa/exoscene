@@ -1,7 +1,8 @@
 # exoscene
 
 **exoscene** is a library of classes and utility functions for simulating direct 
-images of exoplanetary systems.
+images of exoplanetary systems. The package was developed by Neil Zimmerman (NASA/GSFC), 
+with source code contributions from Maxime Rizzo and Christopher Stark.
 
 A jupyter notebook providing usage examples for much of the functionality is included under the docs subdirectory:
 [exoscene/docs/notebooks/Roman-CGI_scene_demo.ipynb](exoscene/docs/notebooks/Roman-CGI_scene_demo.ipynb)
