@@ -73,9 +73,11 @@ class Planet:
         if self.tperi == None:
             self.tperi = 0 * u.year
             
-    def compute_ephem(self, tarray=None, tmax=None, tstep=None):
+    def compute_ephem(self, tarray = None, tbeg = 0 * u.year, tend = None, tstep = None):
         if tarray == None:
-            ts = np.arange(0, tmax.value + tstep.to(tmax.unit).value, tstep.to(tmax.unit).value) * tmax.unit
+            ts = np.arange(tbeg.to(tend.unit).value,
+                           tend.value + tstep.to(tend.unit).value,
+                           tstep.to(tend.unit).value) * tend.unit
         else:
             ts = tarray
         
@@ -246,8 +248,8 @@ def cartesian(a,
     
     return x,y,z,vx,vy,vz
 
-def write_ephem_table(planet, table_fname, tarray=None, tstep=None, tspan=None):
-    tseries, delx, dely, beta, phasefunc, orad = planet.compute_ephem(tarray, tspan, tstep)
+def write_ephem_table(planet, table_fname, tarray=None, tbeg=None, tend=None, tstep=None):
+    tseries, delx, dely, beta, phasefunc, orad = planet.compute_ephem(tarray, tbeg, tend, tstep)
    
     ephem_table = astropy.table.QTable(data = [tseries, delx, dely, phasefunc, orad],
                                                names = ['t (years)', 'delta x (mas)', 'delta y (mas)',
