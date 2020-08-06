@@ -4,6 +4,9 @@
 images of exoplanetary systems. The package was developed by Neil Zimmerman (NASA/GSFC), 
 with source code contributions from Maxime Rizzo and Christopher Stark.
 
+**exoscene** makes significant use of the Astropy, NumPy, SciPy, and 
+Scikit-image packages.
+
 A jupyter notebook providing usage examples for much of the functionality is included under the docs subdirectory:
 [exoscene/docs/notebooks/Roman-CGI_scene_demo.ipynb](exoscene/docs/notebooks/Roman-CGI_scene_demo.ipynb)
 
@@ -16,9 +19,8 @@ The functions are organized in 3 modules: [exoscene/planet.py](exoscene/planet.p
 parameters of a planet, its orbit, its host star, and associated methods for
 computing its relative astrometry ephemeris, its phase function, and flux ratio.
 
-* A function for modeling the orbital position and Lambert sphere phase based
-on the Keplerian orbital elements and the date defined in the Planet class 
-attributes.
+* A function for modeling the orbital position and the Lambert sphere phase function,
+based on the Keplerian orbital elements and date of observation.
 
 * A function for mapping the time-dependent sky-projected position and 
 Lambert phase factor.
