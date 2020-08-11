@@ -248,7 +248,7 @@ def cartesian(a,
     
     return x,y,z,vx,vy,vz
 
-def write_ephem_table(planet, table_fname, tarray=None, tbeg=None, tend=None, tstep=None):
+def write_ephem_table(planet, table_fname, tarray = None, tbeg = 0 * u.year, tend = None, tstep = None):
     tseries, delx, dely, beta, phasefunc, orad = planet.compute_ephem(tarray, tbeg, tend, tstep)
    
     ephem_table = astropy.table.QTable(data = [tseries, delx, dely, phasefunc, orad],
