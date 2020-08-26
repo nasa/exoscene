@@ -51,30 +51,30 @@ def get_bulk_astrom_offset(t_ref, t_obs, mu_RA, mu_Dec, plx, coord_icrs):
     elat = coord_ec_wpm.lat
 
     phi_orb = 2 * np.pi * (t_obs.to(u.year).value % 1)
-    # (1*u.AU) + (1.5 * 10**6) * u.kilometer
-    d_L2Sun = (1.496e11 + 1.492e9) * u.meter
-    d_star = (1 * u.AU / np.sin(plx)).to(u.pc)
-    x_tel = d_L2Sun * np.cos( phi_orb )
-    y_tel = d_L2Sun * np.sin( phi_orb )
+    # d_L2Sun = (1.496e11 + 1.492e9) * u.meter
+    d_L2Sun = (1 * u.AU) + (1.5 * 10**6) * u.kilometer
+    d_star = (1 * u.AU / np.tan(plx)).to(u.pc)
+    x_tel = d_L2Sun * np.cos(phi_orb)
+    y_tel = d_L2Sun * np.sin(phi_orb)
     z_tel = 0 # Assuming L2 orbit on Ecliptical plane
 
     # Vector joining the star and the telescope
-    x_star_tel = d_star * np.cos( elat ) * np.cos( elon ) - x_tel
-    y_star_tel = d_star * np.cos( elat ) * np.sin( elon ) - y_tel
-    z_star_tel = d_star * np.sin( elat )
+    x_star_tel = d_star * np.cos(elat) * np.cos(elon) - x_tel
+    y_star_tel = d_star * np.cos(elat) * np.sin(elon) - y_tel
+    z_star_tel = d_star * np.sin(elat)
 
     # Normalized position vector
-    d_star_tel = sqrt( x_star_tel * x_star_tel 
-                     + y_star_tel * y_star_tel 
-                     + z_star_tel * z_star_tel )
+    d_star_tel = np.sqrt(  x_star_tel * x_star_tel 
+                         + y_star_tel * y_star_tel 
+                         + z_star_tel * z_star_tel)
 
     x_nrm = x_star_tel / d_star_tel
     y_nrm = y_star_tel / d_star_tel
     z_nrm = z_star_tel / d_star_tel
 
     # Deriving the new Ecliptic coordinates
-    elat_wplx = np.arcsin( z_nrm )
-    elon_wplx = np.arctan2( y_nrm, x_nrm )
+    elat_wplx = np.arcsin(z_nrm)
+    elon_wplx = np.arctan2(y_nrm, x_nrm)
     #print("elon, elat = {:.4f}, {:.4f}".format(np.rad2deg(elon_wplx), np.rad2deg(elat_wplx)))
     
     coord_ec_wplx = astropy.coordinates.BarycentricTrueEcliptic(
