@@ -168,7 +168,12 @@ def bpgsfile_to_photonrate(filename,Vmag,minlam,maxlam):
     '''
     wavel = np.arange(minlam,maxlam)
     star = input_star(filename,Vmag,wavel)
-    return (np.sum(star)*u.nm).to(u.photon/u.m**2/u.s)
+
+    if len(wavel) == 1:
+        delta_lambda = (maxlam - minlam) * u.nm
+    else:
+        delta_lambda = 1 * u.nm
+    return (np.sum(star) * delta_lambda).to(u.photon / u.m**2 / u.s)
     
 def input_star(filename,Vmag,wavel):
     '''
