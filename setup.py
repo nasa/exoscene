@@ -17,7 +17,10 @@ setup(
       "numpy",
       "scipy",
       "scikit-image",
-      "pandas"
+      "pandas",
+      "ipython",
+      "matplotlib",
+      "notebook"
   ],
 )
 
