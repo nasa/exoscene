@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='exoscene',
   description='Library for simulating direct images of exoplanetary systems.',
-  version='1.0',
+  version='1.0.post1',
   author='Neil T. Zimmerman',
   author_email='neil.t.zimmerman@nasa.gov',
 
