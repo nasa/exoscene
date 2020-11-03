@@ -1,9 +1,15 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+        long_description = fh.read()
+
 setup(
   name='exoscene',
+  version='1.1',
   description='Library for simulating direct images of exoplanetary systems.',
-  version='1.0.post1',
+  long_description=long_description,
+  long_description_content_type="text/markdown",
+  url="https://github.com/nasa/exoscene",
   author='Neil T. Zimmerman',
   author_email='neil.t.zimmerman@nasa.gov',
 
@@ -12,6 +18,7 @@ setup(
                              './data/bpgs/bpgs_readme.csv',
                              './data/cgi_hlc_psf/*.fits']},
 
+  python_requires='>=3.6',
   install_requires=[
       "astropy >= 4.0",
       "numpy",
