@@ -30,7 +30,8 @@ class Planet:
             self.ecc = ecc
             self.tperi = tperi
             self.argperi = argperi
-            
+        
+        
         if inc != None:
             self.inc = inc
         else:
@@ -63,10 +64,14 @@ class Planet:
         else:
             self.mplan = 1 * u.Mjup
             
-        if self.P == None:
-            self.P = np.sqrt( 4*np.pi**2 / (c.G * (self.mstar + self.mplan) ) * \
+        if self.P == None and self.a == None:
+            raise ValueError('User must define either a period or sma for the planet.')        
+        elif self.P == None:
+            self.P = np.sqrt( 4 * np.pi**2 / (c.G * (self.mstar + self.mplan) ) * \
                               (self.a)**3 ).to(u.year)
-
+        elif self.a == None:
+            self.a = np.cbrt((c.G * (self.mstar + self.mplan) * self.P**2) \
+                             / (4 * np.pi**2) ).to(u.AU)
         if self.argperi == None:
             self.argperi = 0 * u.deg
 
