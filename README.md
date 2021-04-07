@@ -50,4 +50,4 @@ taking into account position-dependent properties included in the model.
 an image with photon counting noise, read noise, and dark current, for a given 
 integration time.
 
-
+Copyright © 2020 United States Government as represented by the Administrator of the National Aeronautics and Space Administration.  All Other Rights Reserved.
