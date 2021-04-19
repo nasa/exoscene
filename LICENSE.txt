@@ -94,7 +94,9 @@ world-wide, royalty-free license to engage in the following activities
 pertaining to the Subject Software:
 
 1. Use
-2. Distribution 3. Reproduction 4. Sale
+2. Distribution 
+3. Reproduction 
+4. Sale
 5. Offer for Sale
 
 C. The rights granted under Paragraph B. also apply to the combination of a
@@ -247,4 +249,3 @@ terms and conditions herein.
 F. Point of Contact: Any Recipient contact with Government Agency is to be
 directed to the designated representative as follows: Darryl Mitchell, SRA,
 (301) 286-5810.
-
