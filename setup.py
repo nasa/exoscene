@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
   name='exoscene',
-  version='1.1',
+  version='1.2',
   description='Library for simulating direct images of exoplanetary systems.',
   long_description=long_description,
   long_description_content_type="text/markdown",
@@ -17,6 +17,11 @@ setup(
   package_data={'exoscene': ['./data/bpgs/bpgs_*.fits',
                              './data/bpgs/bpgs_readme.csv',
                              './data/cgi_hlc_psf/*.fits']},
+
+  classifiers=[
+      "Programming Language :: Python :: 3",
+      "License :: OSI Approved",
+  ],
 
   python_requires='>=3.6',
   install_requires=[
